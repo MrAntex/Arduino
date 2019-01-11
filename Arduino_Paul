@@ -1,0 +1,81 @@
+/*
+   En espérant que ça fasse le taf !
+*/
+
+int led = 13;
+// Tu mets içi la sortie que tu va utiliser pour ta led, en l'occurence la 13 c'est le led "test" qui est
+ // déja implémentée dans toutes les cartes arduino de base.
+ 
+float seuil = 25.0;
+ // Içi tu mets ton seuil de température au dessus duquel tu veux allumer ta led, ça doit  être un float
+  // (en vrai je sais pas si c'est obligatoire mais c'est bcp plus prudent et ça mange padpain)
+   // Donc même si c'est un entier oublie pas le .0 après sinon erreur.
+   
+   // Un float c'est un nombre à virgule qui peut être négatif au fait, okazou. Ca a une plage 2 fois moins
+    // grande qu'un double mais ça très très (très) largement suffisant pour ça.
+    
+void setup() {
+    serial begin(9600);
+    // Pour dire à la carte à quelle fréquence tu travaille, c'est surtout important quand tu veux
+     // afficher des trucs dans la console, mais idem, ça mange padpain.
+    
+    pinMode(led, OUTPUT);
+    // Tu préviens ta carte Arduino que ta variable "led" en fait c'est un numéro de pin (de connexion)
+     // et que c'est une sortie. Pas bête la bête.
+}
+
+void loop() {
+    int valeur_brute = analogRead(A0); // On assigne la sortie du capteur de température à la variable
+    // "valeur_brute" en lui disant de lire la sortie analogique "A0" (analogique parce qu'on veut pas
+    // une température binaire ducon)
+
+  float tension = valeur_brute * (5.0 / 1023.0); // Explications :
+   // la sortie est sur 5v (parce que ton capt est branché en 5v), donc 5000mV. Ca ok. Ensuite,
+    // le CAN (wow les cours de truchot qui piquent) de l'arduino est de 10 bits, donc 2^10 = 1024 - 1 = 1023 valeurs diférentes.
+     // Comme ta sortie sera en bits, sur 1023 bits, il faut la transformer en tension pour lire la temp.
+      // Donc on divise par 1023 et on multiplie par 5 (parce qu'on veut un résultat sous 5v hein)
+       // D'ou le 5/1023. Oui tout ca pour ça, tg.
+        
+        // Youpi, tu as maintenant une équivalence en tension sous 5v de la sortie de ton capteur !
+       
+  float temperature = tension / 0.01;
+    // La ça dépendra de ton capteur et de sa précision. Les cas "classiques" tournent autour des 10mV / °C
+     // C'est le cas du LM35 TMTC la mifa rpz tkt artichaud migi 4ever
+      // Donc la si t'es allé en 4eme tu sais quoi faire : on a la tension de sortie en V, 10mV = 1°C donc tu
+       // divise la tension par 0.01
+       
+        // ET PAF ! DES CHOCAPICS ! Tu as ta température en °C,je précise en Celsius parce que le LM35 à
+         // l'avantage de convertir en Celsius automatiquemnt. Pour certains autres tu as le résultat en Kelvin ou
+          // en farenheit (c'est rare mais ça arrive askip), si besoin :
+           // T°C = (T°F - 32) / 1.8   |   1.8 on met 9/5 en général mais jtrouve que ça fait mieux
+            // T°C = T°K - 273.15
+       
+       // Voala tu as ta température msieur.
+       // Ah et faut surtout pas oublier de bien tout passer en float, sinon il aime pas les divisions,
+        // Et puis une temp a virgule c'est + précis toudememe
+        
+        
+              // TEST + LED //
+              
+        if( temperature >= seuil ) digitalWrite(led, HIGH);
+        // Bon la pas besoin d'avoir bac+74, si la température est supérieure ou égale au seuil alors on
+         // allume la led initialisée plus haut.
+        
+        if( temperature < seuil ) digitalWrite(led, LOW);
+        // Et on l'éteint si la température est en dessous, a ne pas oublier sinon ta led ne s'éteint plus
+         // une fois allumée ¯\_(ツ)_/¯
+
+  //Serial.println(temperature);
+  // Ca c'est si par malheur tu devais tester le code, tu enlèves les "//" et ça t'écrit la température
+   // dans la console, oublie pas de mettre la console en 9600 bauds si tu le fais.
+   
+  delay(200);
+  // Ca pareil, tu peux le mettre en commentaire si tu préfères, j'ai mis un délai pour éviter que
+   // la led fasse un crise d'épillepsie quand tu est à la limite du seuil. Le délai est peut etre
+    // un peu grand mais au pire tu as pas besoin de l'actualiser 500 fois par seconde ta led dans tous les cas imo
+     // et si besoin, tu baisse le délai, ou tu passe la ligne en commentaire si ça t'arrange.
+  
+}
+
+  // Voala tout devrait marcher, dis moi si t'a des questions ou si t'a besoin d'autre chose bro <3
+   // GL HF et passes le bonjour à Lucille & Lou de ma part ;)
